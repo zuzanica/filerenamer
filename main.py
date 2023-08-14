@@ -1,6 +1,5 @@
+from pathlib import Path
 import re
-import os
-import shutil
 from dataclasses import dataclass
 
 
@@ -9,7 +8,7 @@ class InvalidFilenameError(Exception):
 
 
 @dataclass()
-class FileName:
+class FileData:
     code: str
     main_shard: str
     secondary_shard: str
@@ -47,9 +46,6 @@ class FileName:
         result += f'.{self.suffix}'
 
         return result
-
-    def __repr__(self):
-        return self.to_string()
 
     @classmethod
     def get_suffix(cls, f_name):
@@ -107,9 +103,29 @@ class FileName:
         return ""
 
 
-def format_file(f_name_in: str):
-    return FileName.from_file_name(f_name_in).to_string()
+def format_file(input_filename: str):
+    parsed_data = FileData.from_file_name(input_filename)
+    print(parsed_data)
+    return parsed_data.to_string()
 
+
+def fix_files(input_folder: Path,  output_folder: Path, rename_files: bool, copy_files: bool):
+    input_files: list[Path] = [path for path in input_folder.glob('**/*.png')]
+
+    for input_filename in input_files:
+        try:
+            formatted_name = format_file(input_filename)
+            print(f'{input_filename} -> {formatted_name!r}')
+
+            if rename_files:
+                input_filename.rename(input_folder / formatted_name)
+
+            if copy_files:
+                destination: Path = output_folder / formatted_name
+                destination.write_bytes(input_filename.read_bytes())
+
+        except InvalidFilenameError as exception:
+            print(f'{input_filename} -> {exception} ERROR')
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -118,21 +134,8 @@ if __name__ == '__main__':
     folder = 'C:/Users/zuzka/Desktop/photos-all/photos1'
     folder_rename = 'C:/Users/zuzka/Desktop/photos-all/photos1-rename'
 
-    for f_name_in in os.listdir(folder):
-        try:
-            formatted_name = format_file(f_name_in)
-            print(f'{f_name_in} -> {formatted_name!r}')
-            if rename:
-                old_file = os.path.join(folder, f_name_in)
-                new_file = os.path.join(folder, formatted_name)
-                os.rename(old_file, new_file)
-            if copy:
-                old_file = os.path.join(folder, f_name_in)
-                new_file = os.path.join(folder_rename, formatted_name)
-                shutil.copy2(old_file, new_file)
+    fix_files(folder, folder_rename, rename, copy)
 
-        except InvalidFilenameError as exception:
-            print(f'{f_name_in} -> {exception}')
 
 
 

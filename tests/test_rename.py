@@ -1,7 +1,7 @@
 
 import pytest
 
-from main import FileName, InvalidFilenameError
+from main import FileData, InvalidFilenameError
 
 testdata = [
     ("236041275_opabltl-zirblgu_z_11x29_00.psd", "236041275_opabltl_zirblgu_z#00-11x29.psd"),
@@ -16,7 +16,7 @@ testdata = [
 
 @pytest.mark.parametrize("input_file_name,expected", testdata)
 def test_valid(input_file_name, expected):
-    assert FileName.from_file_name(input_file_name).to_string() == expected
+    assert FileData.from_file_name(input_file_name).to_string() == expected
 
 
 @pytest.mark.parametrize("input_file_name", [
@@ -28,4 +28,4 @@ def test_valid(input_file_name, expected):
 ])
 def test_invalid(input_file_name):
     with pytest.raises(InvalidFilenameError):
-        FileName.from_file_name(input_file_name)
+        FileData.from_file_name(input_file_name)
