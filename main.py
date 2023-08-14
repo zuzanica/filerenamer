@@ -1,7 +1,8 @@
+import argparse
 from pathlib import Path
 import re
 from dataclasses import dataclass
-
+import shutil
 
 class InvalidFilenameError(Exception):
     ...
@@ -92,7 +93,7 @@ class FileData:
             secondary = result[1]
 
         if len(result) >= 3:
-            raise InvalidFilenameError("Too many shards")
+            raise InvalidFilenameError(f"Too many shards: {len(result)}")
 
         return primary, secondary
 
@@ -118,17 +119,12 @@ class FileData:
 
     def fix_code_by_color(self):
         """Update first digit based on gold color."""
-        gold_code = f"{GOLD_COLOR_VALUE_MAPPING[self.color[0]]}{self.code[1:]}"
-        print('Fixing color %s -> %s', self.code, gold_code)
-
-        self.code = gold_code
+        self.code = f"{GOLD_COLOR_VALUE_MAPPING[self.color[0]]}{self.code[1:]}"
 
 
 def format_file(input_filename: str) -> str:
     parsed_data = FileData.from_file_name(input_filename)
     parsed_data.fix_code_by_color()
-
-    print(parsed_data)
 
     return str(parsed_data)
 
@@ -136,17 +132,20 @@ def format_file(input_filename: str) -> str:
 def fix_files(input_folder: Path,  output_folder: Path, rename_files: bool, copy_files: bool) -> None:
     input_files: list[Path] = [path for path in input_folder.glob('**/*.png')]
 
+    if not output_folder.exists():
+        output_folder.mkdir(exist_ok=True, parents=True)
+
     for input_filename in input_files:
         try:
-            formatted_name = format_file(input_filename)
+            formatted_name = format_file(input_filename.name)
             print(f'{input_filename} -> {formatted_name!r}')
-
-            if rename_files:
-                input_filename.rename(input_folder / formatted_name)
 
             if copy_files:
                 destination: Path = output_folder / formatted_name
-                destination.write_bytes(input_filename.read_bytes())
+                shutil.copy(input_filename, destination)
+
+            if rename_files:
+                input_filename.rename(input_folder / formatted_name)
 
         except InvalidFilenameError as exception:
             print(f'{input_filename} -> {exception} ERROR')
@@ -155,10 +154,18 @@ def fix_files(input_folder: Path,  output_folder: Path, rename_files: bool, copy
 if __name__ == '__main__':
     rename = False
     copy = False
-    folder = 'C:/Users/zuzka/Desktop/photos-all/photos1'
-    folder_rename = 'C:/Users/zuzka/Desktop/photos-all/photos1-rename'
+    folder = Path('C:/Users/zuzka/Desktop/photos-all/photos1')
+    folder_rename = Path('C:/Users/zuzka/Desktop/photos-all/photos1-rename')
+    # fix_files(folder, folder_rename, rename, copy)
 
-    fix_files(folder, folder_rename, rename, copy)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--input', dest='input', default='.', help='Input folder with images to sort.')
+    parser.add_argument('-d', '--dest', dest='dest', default='./renamed', help='Destination folder with updated images when copy is used.')
+    parser.add_argument('-r', '--rename', dest='rename', default=False, action='store_true', help='Whether to rename files in place.')
+    parser.add_argument('-c', '--copy', dest='copy', default=False, action='store_true', help='Whether to copy files to dest folder.')
+
+    args = parser.parse_args()
+    fix_files(Path(args.input), Path(args.dest), args.rename, args.copy)
 
 
 
