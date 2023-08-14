@@ -22,8 +22,7 @@ class FileData:
         f_name = f_name.replace('-', '_')
 
         code = cls.get_code(f_name)
-        main_shard = cls.get_main_shard(f_name)
-        secondary_shard = cls.get_secondary_shard(f_name)
+        main_shard, secondary_shard = cls.get_shards(f_name)
         color = cls.get_color(f_name)
         size = cls.get_size(f_name)
         number = cls.get_number(f_name)
@@ -67,25 +66,22 @@ class FileData:
         return result[0].replace('_', '').replace('.', '')
 
     @classmethod
-    def get_main_shard(cls, f_name):
-        pattern = '[a-z]{7}'
-        result = re.findall(pattern, f_name)
-        if len(result) < 1:
-            return ""
-        else:
-            return result[0]
-
-    @classmethod
-    def get_secondary_shard(cls, f_name):
+    def get_shards(cls, f_name):
+        primary = ''
+        secondary = ''
         pattern = '[a-z]{7}'
         result = re.findall(pattern, f_name)
 
-        if len(result) < 2:
-            return ""
-        elif len(result) > 3:
+        if len(result) > 0:
+            primary = result[0]
+
+        if len(result) > 1:
+            secondary = result[1]
+
+        if len(result) >= 3:
             raise InvalidFilenameError("Too many shards")
-        else:
-            return result[1]
+
+        return primary, secondary
 
     @classmethod
     def get_number(cls, f_name) -> str:
