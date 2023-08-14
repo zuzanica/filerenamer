@@ -7,6 +7,13 @@ class InvalidFilenameError(Exception):
     ...
 
 
+GOLD_COLOR_VALUE_MAPPING = {
+    'z': 2,
+    'b': 3,
+    'r': 7,
+}
+
+
 @dataclass()
 class FileData:
     code: str
@@ -38,6 +45,7 @@ class FileData:
 
         if self.secondary_shard != '':
             result += f'{self.secondary_shard}_'
+
         result += f'{self.color}#{self.number}'
 
         if self.size != '':
@@ -57,13 +65,18 @@ class FileData:
 
     @classmethod
     def get_color(cls, f_name) -> str:
-        pattern = "\_[a-z]{1,2}[\_{1}|\.{1}]"
+        pattern = "\_[a-z]{1,3}[\_{1}|\.{1}]"
         result = re.findall(pattern, f_name)
 
         if len(result) != 1:
             raise InvalidFilenameError("Invalid color")
 
-        return result[0].replace('_', '').replace('.', '')
+        color = result[0].replace('_', '').replace('.', '')
+
+        if color not in ('z', 'b', 'r', 'zb', 'zr', 'bz', 'br', 'rz', 'rb', 'zbr'):
+            raise InvalidFilenameError(f'Not valid value for color: {color}')
+
+        return color
 
     @classmethod
     def get_shards(cls, f_name):
@@ -103,9 +116,18 @@ class FileData:
 
         return ""
 
+    def fix_code_by_color(self):
+        """Update first digit based on gold color."""
+        gold_code = f"{GOLD_COLOR_VALUE_MAPPING[self.color[0]]}{self.code[1:]}"
+        print('Fixing color %s -> %s', self.code, gold_code)
+
+        self.code = gold_code
+
 
 def format_file(input_filename: str) -> str:
     parsed_data = FileData.from_file_name(input_filename)
+    parsed_data.fix_code_by_color()
+
     print(parsed_data)
 
     return str(parsed_data)
