@@ -16,7 +16,7 @@ testdata = [
 
 @pytest.mark.parametrize("input_file_name,expected", testdata)
 def test_valid(input_file_name, expected):
-    assert FileData.from_file_name(input_file_name).to_string() == expected
+    assert str(FileData.from_file_name(input_file_name)) == expected
 
 
 @pytest.mark.parametrize("input_file_name", [
