@@ -28,16 +28,17 @@ class FileData:
         size = cls.get_size(f_name)
         number = cls.get_number(f_name)
         suffix = cls.get_suffix(f_name)
+
         return cls(code, main_shard, secondary_shard, color, size, number, suffix)
 
-    def to_string(self):
+    def __str__(self) -> str:
         result = f'{self.code}_'
+
         if self.main_shard != '':
             result += f'{self.main_shard}_'
 
         if self.secondary_shard != '':
             result += f'{self.secondary_shard}_'
-
         result += f'{self.color}#{self.number}'
 
         if self.size != '':
@@ -48,21 +49,20 @@ class FileData:
         return result
 
     @classmethod
-    def get_suffix(cls, f_name):
+    def get_suffix(cls, f_name) -> str:
         return f_name.rsplit('.', 1)[1]
 
     @classmethod
-    def get_code(cls, f_name):
+    def get_code(cls, f_name) -> str:
         return f_name.rsplit('_')[0]
 
     @classmethod
-    def get_color(cls, f_name):
+    def get_color(cls, f_name) -> str:
         pattern = "\_[a-z]{1,2}[\_{1}|\.{1}]"
         result = re.findall(pattern, f_name)
 
         if len(result) != 1:
-            raise InvalidFilenameError("Invalid color"
-                                       "")
+            raise InvalidFilenameError("Invalid color")
 
         return result[0].replace('_', '').replace('.', '')
 
@@ -79,6 +79,7 @@ class FileData:
     def get_secondary_shard(cls, f_name):
         pattern = '[a-z]{7}'
         result = re.findall(pattern, f_name)
+
         if len(result) < 2:
             return ""
         elif len(result) > 3:
@@ -87,29 +88,34 @@ class FileData:
             return result[1]
 
     @classmethod
-    def get_number(cls, f_name):
+    def get_number(cls, f_name) -> str:
         pattern = '_[0-9]{1,2}[\_|\.]{1}'
         result = re.findall(pattern, f_name)
+
         if len(result) < 1:
-            raise InvalidFilenameError("Too many shards")
+            raise InvalidFilenameError("Number not found")
+
         return result[0].replace('_', '').replace('.', '')
 
     @classmethod
-    def get_size(cls, f_name):
+    def get_size(cls, f_name) -> str:
         name_spit = f_name.rsplit('_')
+
         for name_part in name_spit:
             if 'x' in name_part:
                 return name_part
+
         return ""
 
 
-def format_file(input_filename: str):
+def format_file(input_filename: str) -> str:
     parsed_data = FileData.from_file_name(input_filename)
     print(parsed_data)
-    return parsed_data.to_string()
+
+    return str(parsed_data)
 
 
-def fix_files(input_folder: Path,  output_folder: Path, rename_files: bool, copy_files: bool):
+def fix_files(input_folder: Path,  output_folder: Path, rename_files: bool, copy_files: bool) -> None:
     input_files: list[Path] = [path for path in input_folder.glob('**/*.png')]
 
     for input_filename in input_files:
