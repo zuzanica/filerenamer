@@ -1,0 +1,4 @@
+*.pyc
+
+# Default for dest folder
+renamed/
