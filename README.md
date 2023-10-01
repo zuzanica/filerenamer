@@ -8,8 +8,9 @@ Príklad obsluhy (použité na macOs, na windowse nutno použiť správne cesty 
    - -d ako destination - vystupný priečinok
    - -c ako copy chceš kopírovať dáta
 
+```
 python3 main.py -i /Users/zuzanastudena/private/filerenamer/data -d /Users/zuzanastudena/private/filerenamer/newtest -c
-
+```
 
 2. premenovanie všetkých súborov v priečinku: /Users/zuzanastudena/private/filerenamer/data-test
     - python3, možno použiť aj python záleží od naištalovanej verzie
@@ -17,5 +18,6 @@ python3 main.py -i /Users/zuzanastudena/private/filerenamer/data -d /Users/zuzan
     - -i ako input - vstupný priečinok
     - -r ako rename chceš iba premenovať existujúce súbory
     - -d v tomto prípade nepotrebuješ
-
-python3 main.py -i /Users/zuzanastudena/private/filerenamer/data-test -r    
+```
+python3 main.py -i /Users/zuzanastudena/private/filerenamer/data-test -r
+```
