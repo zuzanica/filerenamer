@@ -47,7 +47,7 @@ class FileData:
         if self.secondary_shard != '':
             result += f'{self.secondary_shard}_'
 
-        result += f'{self.color}#{self.number}'
+        result += f'{self.color}@{self.number}'
 
         if self.size != '':
             result += f'-{self.size}'
